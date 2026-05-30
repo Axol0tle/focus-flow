@@ -1,87 +1,84 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from './supabase';
 
 function App() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [user, setUser] = useState(null);
-  const [error, setError] = useState('');
 
-  // Handle User Registration
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    setError('');
-    const { data, error } = await supabase.auth.signUp({
-      email: email,
-      password: password,
-    });
-    
-    if (error) {
-      setError(error.message);
-    } else {
-      setUser(data.user);
-    }
-  };
-
-  // Handle User Login
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email,
-      password: password,
+  // This checks if the user is already logged in when they open the app
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
     });
 
-    if (error) {
-      setError(error.message);
-    } else {
-      setUser(data.user);
-    }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // The single function to trigger Google Login
+  const loginWithGoogle = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+    });
   };
 
-  // Handle Logout
+  // The function to log out
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    setUser(null);
-    setEmail('');
-    setPassword('');
   };
 
+  // ==========================================
+  // PAGE 1: THE LOGIN SCREEN (If not logged in)
+  // ==========================================
+  if (!user) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '100px', fontFamily: 'Arial' }}>
+        <h1>FocusFlow 🚀</h1>
+        <p style={{ marginBottom: '30px' }}>Please sign in to access your tasks.</p>
+        
+        <button 
+          onClick={loginWithGoogle} 
+          style={{ 
+            padding: '12px 24px', 
+            fontSize: '16px', 
+            cursor: 'pointer', 
+            backgroundColor: '#4285F4', 
+            color: 'white', 
+            border: 'none', 
+            borderRadius: '4px',
+            fontWeight: 'bold'
+          }}>
+          Sign in with Google
+        </button>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // PAGE 2: THE WELCOME DASHBOARD (If logged in)
+  // ==========================================
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '50px', fontFamily: 'Arial' }}>
-      <h1>FocusFlow 🚀</h1>
-      <p>Technical Proof of Concept: Supabase Auth</p>
+    <div style={{ padding: '40px', fontFamily: 'Arial', maxWidth: '800px', margin: '0 auto' }}>
+      
+      {/* Top Navigation Bar */}
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ccc', paddingBottom: '20px' }}>
+        <h2 style={{ margin: 0 }}>FocusFlow</h2>
+        <button 
+          onClick={handleLogout} 
+          style={{ padding: '8px 16px', cursor: 'pointer', backgroundColor: '#f44336', color: 'white', border: 'none', borderRadius: '4px' }}>
+          Logout
+        </button>
+      </header>
+      
+      {/* Main Welcome Content */}
+      <main style={{ marginTop: '40px' }}>
+        {/* Google gives us their real name, so we can display it! */}
+        <h1>Welcome aboard, {user.user_metadata?.full_name || 'User'}! 🎉</h1>
+        <p>Logged in as: <strong>{user.email}</strong></p>
+      </main>
 
-      {error && <p style={{ color: 'red', maxWidth: '300px', textAlign: 'center' }}>{error}</p>}
-
-      {!user ? (
-        <form style={{ display: 'flex', flexDirection: 'column', width: '300px', gap: '10px' }}>
-          <input 
-            type="email" 
-            placeholder="Email" 
-            value={email} 
-            onChange={(e) => setEmail(e.target.value)} 
-            style={{ padding: '8px' }}
-          />
-          <input 
-            type="password" 
-            placeholder="Password" 
-            value={password} 
-            onChange={(e) => setPassword(e.target.value)} 
-            style={{ padding: '8px' }}
-          />
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <button onClick={handleLogin} style={{ padding: '10px 20px', cursor: 'pointer' }}>Login</button>
-            <button onClick={handleRegister} style={{ padding: '10px 20px', cursor: 'pointer' }}>Register</button>
-          </div>
-        </form>
-      ) : (
-        <div style={{ textAlign: 'center' }}>
-          <h3 style={{ color: 'green' }}>Welcome back, {user.email}!</h3>
-          <p>You have successfully authenticated via Supabase.</p>
-          <button onClick={handleLogout} style={{ padding: '10px 20px', cursor: 'pointer' }}>Logout</button>
-        </div>
-      )}
     </div>
   );
 }
