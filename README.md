@@ -6,7 +6,7 @@ procrastination.
 
 ---
 
-## 2. Features and Design of Application
+## 1. Features and Design of Application
 
 ## Background
 * As students, we all struggle with the overwhelming amount of work and deadlines to follow. Without any aid or list, it becomes very
@@ -49,7 +49,7 @@ FocusFlow is designed as a headless PWA to ensure it runs smoothly across deskto
 
 ---
 
-## 3. Development Plan
+## 2. Development Plan
 
 Our development roadmap is split into three main phases:
 
@@ -66,7 +66,7 @@ Our development roadmap is split into three main phases:
 
 ---
 
-## 4. Documentation of System
+## 3. Documentation of System
 
 ### Tech Stack
 * **Frontend Framework:** React.js (initialized via Vite)
