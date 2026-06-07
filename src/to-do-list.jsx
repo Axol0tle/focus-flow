@@ -9,16 +9,19 @@ function ToDoList() {
 
     // Visual stuff
     return (
-        <div style={{ marginTop: '40px' }}>
-            <h2>My Tasks</h2>
+        <div style={{ padding: '15px 12px' ,marginTop: '40px' , backgroundColor: '#030d1c',  border: '2px solid rgba(57, 51, 51, 0.6)' , borderRadius:'20px'}}>
+            <h2>To-Do-List</h2>
             <input type="text" placeholder="Type a task here..."/>
             <button> Add Task </button>
 
             <ul>
-                <li> placeholder task</li>
+                <li> placeholder task#1 </li>
+                <li> placeholder task#2 </li>
+                <li> placeholder task#3 </li>
             </ul>
         </div>
     );
 }
+
 
 export default ToDoList;

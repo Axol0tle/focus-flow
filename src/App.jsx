@@ -36,7 +36,7 @@ function App() {
   if (!user) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '100px', fontFamily: 'Arial' }}>
-        <h1>FocusFlow 🚀</h1>
+        <p style={{ fontSize: '100px', marginBottom: '40px' }}>FocusFlow</p>
         <p style={{ marginBottom: '30px' }}>Please sign in to access your tasks.</p>
         
         <button 
