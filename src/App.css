@@ -182,3 +182,32 @@
     border-right-color: var(--border);
   }
 }
+
+/* for <ul> container */
+.todo-list {
+  list-style: none;
+  padding: 0;
+  margin: 20px auto;
+  width: 90%; 
+  max-width: 400px;
+}
+
+/* for <li> row */
+.todo-item {
+  display: flex;         /* turns the row into a "Flexbox" row??*/
+  align-items: center;   /* centers the checkbox, text, and button vertically */
+  padding: 10px 0;       /* spacing on top and bottom */
+  border-bottom: 1px solid #ddd; /* adds a line between tasks */
+}
+
+/* for the txt <span> inside the row */
+.todo-text {
+  flex: 1;               /* forces the text to stretch and take up all middle space */
+  text-align: left;      /* aligns the text cleanly to the left wall */
+  margin-left: 12px;     /* gap after the checkbox */
+  margin-right: 12px;    /* gap before the delete button */
+
+  word-break: break-all;     /* chops incredibly long random words anywhere */
+  overflow-wrap: break-word; /* back-up rule to force wraps on long strings */
+  min-width: 0;              /* flexbox requirement so the container can actually shrink */
+}
