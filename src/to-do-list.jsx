@@ -48,11 +48,11 @@ function ToDoList() {
 
     // Visual stuff
     return (
-    <div style={{ padding: '15px 12px' ,marginTop: '40px' , backgroundColor: '#ffffff',  border: '2px solid rgba(48, 36, 36, 0.6)' , borderRadius:'20px'}} className="todo-container">
+    <div style={{ padding: '15px 12px' ,marginTop: '40px' , backgroundColor: '#f1f1f1',  border: '2px solid rgba(48, 36, 36, 0.6)' , borderRadius:'20px'}} className="todo-container">
       <h2>My Tasks</h2>
       
       {/* The Input Area */}
-      <div style ={{display: 'flex', flexDirection: 'column', gap: '10px', marginBottom:'20px'}}>
+      <div className="task-form-card">
         <input 
           type = "text" 
           value = {inputValue} 
