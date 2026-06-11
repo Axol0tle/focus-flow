@@ -48,8 +48,14 @@ function ToDoList() {
 
     // Visual stuff
     return (
-    <div style={{ padding: '15px 12px' ,marginTop: '40px' , backgroundColor: '#f1f1f1',  border: '2px solid rgba(48, 36, 36, 0.6)' , borderRadius:'20px'}} className="todo-container">
-      <h2>My Tasks</h2>
+    <div style={{ 
+      padding: '15px 12px' ,
+      marginTop: '40px' , 
+      backgroundColor: '#2644ca44',  
+      border: '5px solid rgba(48, 36, 36, 0.6)' , 
+      borderRadius:'20px'
+      }} 
+      className="todo-container">
       
       {/* The Input Area */}
       <div className="task-form-card">
@@ -79,7 +85,7 @@ function ToDoList() {
           type = "number"
           value = {estimatedTimeValue}
           onChange = {(e) => setEstimatedTimeValue(e.target.value)}
-          placeholder = "Time to complete (Hours)"
+          placeholder = "Hours to Complete"
           className='form-input'
         />
 
@@ -90,6 +96,7 @@ function ToDoList() {
 
       {/* The List Area */}
       <ul className='todo-list'>
+        <h2>My Tasks</h2>
         {todos.map((task) => (
           <li key={task.id} className='todo-item'>
             

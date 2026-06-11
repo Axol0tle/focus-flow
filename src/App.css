@@ -1,3 +1,11 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #e2e7f0; 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333333;
+}
+
 .counter {
   font-size: 16px;
   padding: 5px 10px;
@@ -197,7 +205,7 @@
   display: flex;         /* turns the row into a "Flexbox" row??*/
   align-items: center;   /* centers the checkbox, text, and button vertically */
   padding: 10px 0;       /* spacing on top and bottom */
-  border-bottom: 1px solid #ddd; /* adds a line between tasks */
+  border-bottom: 1px solid #dddddd; /* adds a line between tasks */
 }
 
 /* for the txt <span> inside the row */
@@ -258,4 +266,15 @@
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.2s ease;
+}
+
+.form-submit-button:hover {
+  background-color: #4153a5; 
+  transform: translateY(-2px); /* lifts the button up by 2 pixels */
+  box-shadow: 0 4px 12px rgba(46, 54, 164, 0.3); /* adds a glowing shadow */
+}
+
+.form-submit-button:active {
+  transform: translateY(0); /* pushes the button back down when clicked */
+  box-shadow: none; /* removes the shadow while pressing */
 }
