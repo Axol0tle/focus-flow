@@ -58,30 +58,34 @@ function ToDoList() {
           value = {inputValue} 
           onChange = {(e) => setInputValue(e.target.value)} 
           placeholder= "What needs to be done? (Task Title)" 
+          className='form-input'
         />
         <textarea
-        value = {DescriptionValue}
-        onChange = {(e) => setDescriptionValue(e.target.value)}
-        placeholder = "Description of task"
-        rows = "3"
+          value = {DescriptionValue}
+          onChange = {(e) => setDescriptionValue(e.target.value)}
+          placeholder = "Description of task"
+          rows = "3"
+          className='form-input'
         />
 
       <div style = {{display: 'flex', gap: '10px'}}>
         <input
-        type = "date"
-        value = {DueDateValue}
-        onChange = {(e) => setDueDateValue(e.target.value)}
+          type = "date"
+          value = {DueDateValue}
+          onChange = {(e) => setDueDateValue(e.target.value)}
+          className='form-input'
         />
         <input
-        type = "number"
-        value = {estimatedTimeValue}
-        onChange = {(e) => setEstimatedTimeValue(e.target.value)}
-        placeholder = "Estimated time of completion (Hours)"
+          type = "number"
+          value = {estimatedTimeValue}
+          onChange = {(e) => setEstimatedTimeValue(e.target.value)}
+          placeholder = "Time to complete (Hours)"
+          className='form-input'
         />
 
 
       </div>
-        <button onClick={addTask}>Add Task</button>
+        <button className="form-submit-button" onClick={addTask} >Add Task</button>
     </div>
 
       {/* The List Area */}
