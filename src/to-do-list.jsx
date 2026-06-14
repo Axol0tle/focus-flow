@@ -21,7 +21,8 @@ function ToDoList() {
         description: DescriptionValue,
         dueDate: DueDateValue,
         estimatedTime: estimatedTimeValue,
-        completed: false // starts as not done
+        completed: false, // starts as not done
+        showDetails: false // starts with details hidden
         };
 
         setTodos([...todos, newTask]); // Copy old list, add new task
@@ -39,12 +40,22 @@ function ToDoList() {
         setTodos(updatedList);
     };
 
+    // to show and hide the detail for the task
+    const toggleDetails = (id) => {
+        const updatedList = todos.map((task) => 
+        task.id === id ? { ...task, showDetails: !task.showDetails } : task
+        );
+        setTodos(updatedList);
+    };
+
     // DELETE: Remove a task completely
     const deleteTask = (id) => {
         const filteredList = todos.filter((task) => task.id !== id);
         setTodos(filteredList);
     };
 
+    // count the number of tasks incomplete
+    const incompleteCount = todos.filter((task) => !task.completed).length;
 
     // Visual stuff
     return (
@@ -95,26 +106,46 @@ function ToDoList() {
     </div>
 
       {/* The List Area */}
+      <h2 style={{ marginTop: '30px' }}>
+        Number of tasks left: {incompleteCount}
+      </h2> 
+
       <ul className='todo-list'>
         <h2>My Tasks</h2>
         {todos.map((task) => (
-          <li key={task.id} className='todo-item'>
+          <li key={task.id} className='todo-item' style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
             
-            <input 
-              type="checkbox" 
-              checked={task.completed}
-              onChange={() => toggleTask(task.id)} 
-            />
+            <div style={{ flexBasis: '100%', display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+              <input 
+                type="checkbox" 
+                checked={task.completed}
+                onChange={() => toggleTask(task.id)} 
+              />
+          
+              {/* If completed, add a strikethrough */}
+              <span 
+                  className='todo-text'
+                  style={{ textDecoration: task.completed ? 'line-through' : 'none', marginLeft: '8px', fontSize: '1.1em', fontWeight: 'bold' }}>
+                {task.text}
+              </span>
+            </div>
             
-            {/* If completed, add a strikethrough */}
-            <span 
-                className='todo-text'
-                style={{ textDecoration: task.completed ? 'line-through' : 'none' }}>
-              {task.text}
-            </span>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button onClick={() => toggleDetails(task.id)}>
+                {task.showDetails ? "Hide Details" : "Details"}
+              </button>
+              <button onClick={() => deleteTask(task.id)}>Delete</button>
+            </div>
             
-            <button onClick={() => deleteTask(task.id)}>Delete</button>
-            
+            {/* if hidedetail is false, show details */}
+            {task.showDetails && (
+              <div className='todo-details' style={{ flexBasis: '100%', marginTop: '10px' }}>
+                <span className='todo-description'><strong>Description:</strong> {task.description} <br/></span>
+                <span className='todo-due-date'><strong>Due:</strong> {task.dueDate} <br/></span>
+                <span className='todo-estimated-time'><strong>Estimated Time:</strong> {task.estimatedTime} hrs</span>
+              </div>
+            )}
+
           </li>
         ))}
       </ul>
