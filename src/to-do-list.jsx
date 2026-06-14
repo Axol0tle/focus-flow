@@ -45,6 +45,8 @@ function ToDoList() {
         setTodos(filteredList);
     };
 
+    // count the number of tasks incomplete
+    const incompleteCount = todos.filter((task) => !task.completed).length;
 
     // Visual stuff
     return (
@@ -85,6 +87,10 @@ function ToDoList() {
     </div>
 
       {/* The List Area */}
+      <h2 style={{ marginTop: '30px' }}>
+        Number of tasks left: {incompleteCount}
+      </h2> 
+
       <ul className='todo-list'>
         {todos.map((task) => (
           <li key={task.id} className='todo-item'>
