@@ -48,44 +48,55 @@ function ToDoList() {
 
     // Visual stuff
     return (
-    <div style={{ padding: '15px 12px' ,marginTop: '40px' , backgroundColor: '#ffffff',  border: '2px solid rgba(48, 36, 36, 0.6)' , borderRadius:'20px'}} className="todo-container">
-      <h2>My Tasks</h2>
+    <div style={{ 
+      padding: '15px 12px' ,
+      marginTop: '40px' , 
+      backgroundColor: '#2644ca44',  
+      border: '5px solid rgba(48, 36, 36, 0.6)' , 
+      borderRadius:'20px'
+      }} 
+      className="todo-container">
       
       {/* The Input Area */}
-      <div style ={{display: 'flex', flexDirection: 'column', gap: '10px', marginBottom:'20px'}}>
+      <div className="task-form-card">
         <input 
           type = "text" 
           value = {inputValue} 
           onChange = {(e) => setInputValue(e.target.value)} 
           placeholder= "What needs to be done? (Task Title)" 
+          className='form-input'
         />
         <textarea
-        value = {DescriptionValue}
-        onChange = {(e) => setDescriptionValue(e.target.value)}
-        placeholder = "Description of task"
-        rows = "3"
+          value = {DescriptionValue}
+          onChange = {(e) => setDescriptionValue(e.target.value)}
+          placeholder = "Description of task"
+          rows = "3"
+          className='form-input'
         />
 
       <div style = {{display: 'flex', gap: '10px'}}>
         <input
-        type = "date"
-        value = {DueDateValue}
-        onChange = {(e) => setDueDateValue(e.target.value)}
+          type = "date"
+          value = {DueDateValue}
+          onChange = {(e) => setDueDateValue(e.target.value)}
+          className='form-input'
         />
         <input
-        type = "number"
-        value = {estimatedTimeValue}
-        onChange = {(e) => setEstimatedTimeValue(e.target.value)}
-        placeholder = "Estimated time of completion (Hours)"
+          type = "number"
+          value = {estimatedTimeValue}
+          onChange = {(e) => setEstimatedTimeValue(e.target.value)}
+          placeholder = "Hours to Complete"
+          className='form-input'
         />
 
 
       </div>
-        <button onClick={addTask}>Add Task</button>
+        <button className="form-submit-button" onClick={addTask} >Add Task</button>
     </div>
 
       {/* The List Area */}
       <ul className='todo-list'>
+        <h2>My Tasks</h2>
         {todos.map((task) => (
           <li key={task.id} className='todo-item'>
             

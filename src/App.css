@@ -1,3 +1,11 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #e2e7f0; 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333333;
+}
+
 .counter {
   font-size: 16px;
   padding: 5px 10px;
@@ -197,7 +205,7 @@
   display: flex;         /* turns the row into a "Flexbox" row??*/
   align-items: center;   /* centers the checkbox, text, and button vertically */
   padding: 10px 0;       /* spacing on top and bottom */
-  border-bottom: 1px solid #ddd; /* adds a line between tasks */
+  border-bottom: 1px solid #dddddd; /* adds a line between tasks */
 }
 
 /* for the txt <span> inside the row */
@@ -210,4 +218,63 @@
   word-break: break-all;     /* chops incredibly long random words anywhere */
   overflow-wrap: break-word; /* back-up rule to force wraps on long strings */
   min-width: 0;              /* flexbox requirement so the container can actually shrink */
+}
+
+
+.task-form-card {
+  background-color: #d8c7c7;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba( 0 0 0 0.05);
+  border: 1px solid #080808;
+  display: flex;
+  flex-direction: column;
+  gap: 16px; 
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 15px;
+  font-family: inherit;
+  border: 1px solid #8f7f7f;
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: #333333;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  resize: none;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #4285F4;
+  background-color: #ebe5e5;
+  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.15);
+}
+
+.form-submit-button {
+  width: 100%;
+  padding: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #7e94b4; 
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.form-submit-button:hover {
+  background-color: #4153a5; 
+  transform: translateY(-2px); /* lifts the button up by 2 pixels */
+  box-shadow: 0 4px 12px rgba(46, 54, 164, 0.3); /* adds a glowing shadow */
+}
+
+.form-submit-button:active {
+  transform: translateY(0); /* pushes the button back down when clicked */
+  box-shadow: none; /* removes the shadow while pressing */
 }
