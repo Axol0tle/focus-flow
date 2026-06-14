@@ -1,4 +1,5 @@
 import ToDoList from './to-do-list';
+import './App.css';
 
 export default function Dashboard({ user, handleLogout }) {
   return (
