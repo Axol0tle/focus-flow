@@ -191,6 +191,25 @@ body {
   }
 }
 
+
+.logout {
+  padding: 8px 16px;
+  background-color: #ff0022c4;
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff ;
+  border: 1px ;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.logout:hover {
+  background-color: #f31628; 
+  transform: translateY(-1px); /* lifts the button up by 1 pixels */
+  box-shadow: 0 4px 12px rgba(224, 10, 21, 0.3); /* adds a glowing shadow */
+}
+
 /* for <ul> container */
 .todo-list {
   list-style: none;
