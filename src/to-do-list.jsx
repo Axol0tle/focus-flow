@@ -11,6 +11,9 @@ function ToDoList() {
     // Memory for list of tasks
     const [todos, setTodos] = useState([]);
 
+    // IDs of the tasks that are currently "open"
+    const [expandedTasks, setExpandedTasks] = useState([]);
+
     // CREATE: Add a new task
     const addTask = () => {
         if (inputValue.trim() === "") return; // prevent empty tasks
@@ -40,14 +43,6 @@ function ToDoList() {
         setTodos(updatedList);
     };
 
-    // to show and hide the detail for the task
-    const toggleDetails = (id) => {
-        const updatedList = todos.map((task) => 
-        task.id === id ? { ...task, showDetails: !task.showDetails } : task
-        );
-        setTodos(updatedList);
-    };
-
     // DELETE: Remove a task completely
     const deleteTask = (id) => {
         const filteredList = todos.filter((task) => task.id !== id);
@@ -56,6 +51,17 @@ function ToDoList() {
 
     // count the number of tasks incomplete
     const incompleteCount = todos.filter((task) => !task.completed).length;
+
+    // Logic for collapsible list
+    const toggleDetails = (taskId) => {
+      if (expandedTasks.includes(taskId)) {
+        // if its already open, filter it out to close it
+        setExpandedTasks(expandedTasks.filter(id => id !== taskId));
+      } else {
+        // if its closed, add it to the list of open tasks
+        setExpandedTasks([...expandedTasks, taskId]);
+      }
+    };
 
     // Visual stuff
     return (
@@ -74,7 +80,7 @@ function ToDoList() {
           type = "text" 
           value = {inputValue} 
           onChange = {(e) => setInputValue(e.target.value)} 
-          placeholder= "What needs to be done? (Task Title)" 
+          placeholder= "What needs to be done?" 
           className='form-input'
         />
         <textarea
@@ -128,22 +134,28 @@ function ToDoList() {
                   style={{ textDecoration: task.completed ? 'line-through' : 'none', marginLeft: '8px', fontSize: '1.1em', fontWeight: 'bold' }}>
                 {task.text}
               </span>
-            </div>
             
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button onClick={() => toggleDetails(task.id)}>
-                {task.showDetails ? "Hide Details" : "Details"}
+              {/* The Arrow Toggle Button */}
+              <button 
+                className="icon-btn" 
+                onClick={() => toggleDetails(task.id)}
+              >
+                {expandedTasks.includes(task.id) ? '▲' : '▼'}
               </button>
-              <button onClick={() => deleteTask(task.id)}>Delete</button>
+
+              {/* The Delete Button */}
+              <button className="delete-btn" onClick={() => deleteTask(task.id)}>
+                Delete
+              </button>
+
             </div>
-            
-            {/* if hidedetail is false, show details */}
-            {task.showDetails && (
-              <div className='todo-details' style={{ flexBasis: '100%', marginTop: '10px' }}>
-                <span className='todo-description'><strong>Description:</strong> {task.description} <br/></span>
-                <span className='todo-due-date'><strong>Due:</strong> {task.dueDate} <br/></span>
-                <span className='todo-estimated-time'><strong>Estimated Time:</strong> {task.estimatedTime} hrs</span>
-              </div>
+
+            {expandedTasks.includes(task.id) && (
+            <div className="todo-details-box">
+              <p><strong>Description:</strong> {task.description}</p>
+              <p><strong>Due:</strong> {task.dueDate}</p>
+              <p><strong>Estimated Time:</strong> {task.estimatedTime}h</p>
+            </div>
             )}
 
           </li>

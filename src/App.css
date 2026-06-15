@@ -220,6 +220,57 @@ body {
   min-width: 0;              /* flexbox requirement so the container can actually shrink */
 }
 
+/* Clean up the arrow button */
+.icon-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px;
+  margin-right: 8px;
+  color: #555;
+  border-radius: 4px;
+}
+
+.icon-btn:hover {
+  background-color: rgba(0,0,0,0.05);
+}
+
+.delete-btn {
+  padding: 8px;
+  background: none;
+  color: #94a3b8; /* Subtle slate gray */
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+/* The Hover State: Soft red background, bright red icon */
+.delete-btn:hover {
+  background-color: #fee2e2; 
+  color: #ef4444; 
+}
+
+/* Style the dropdown box */
+.todo-details-box {
+  margin-top: 12px;
+  padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: rgba(255, 255, 255, 0.4); /* background */
+  border-radius: 8px;
+  border-left: 4px solid #4285F4; /* blue accent line on the left */
+  font-size: 14px;
+  text-align: left;
+}
+
+.todo-details-box p {
+  margin: 4px 0; /* Tightens up the spacing between text */
+}
 
 .task-form-card {
   background-color: #d8c7c7;
@@ -278,3 +329,4 @@ body {
   transform: translateY(0); /* pushes the button back down when clicked */
   box-shadow: none; /* removes the shadow while pressing */
 }
+
