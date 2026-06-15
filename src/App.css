@@ -219,6 +219,37 @@ body {
   max-width: 400px;
 }
 
+/* Header as a whole */
+.task-header-row {
+  margin-top: 50px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;    
+  justify-content: center; 
+  gap: 10px;              
+  margin-bottom: 10px;
+  position: relative;
+  width: 100%
+}
+
+/* "My Tasks" */
+.task-header-title {
+  margin: 0;
+  color: #1e293b;
+}
+
+/* the counter */
+.task-counter-badge {
+  position: absolute;
+  right: 15px;
+  background-color: #e2e8f0; 
+  color: #475569;            
+  font-size: 13px;          
+  font-weight: 600;         
+  padding: 4px 10px;        
+  border-radius: 20px;       
+}
+
 /* for <li> row */
 .todo-item {
   display: flex;         /* turns the row into a "Flexbox" row??*/

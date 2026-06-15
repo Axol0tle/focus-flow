@@ -110,17 +110,19 @@ function ToDoList() {
       </div>
         <button className="form-submit-button" onClick={addTask} >Add Task</button>
     </div>
+      
+      {/* Header Row */}
+      <div className="task-header-row">
+        <h2 className="task-header-title">My Tasks</h2>
+        <div className="task-counter-badge">
+          {incompleteCount} Left
+        </div>
+      </div>
 
-      {/* The List Area */}
-      <h2 style={{ marginTop: '30px' }}>
-        Number of tasks left: {incompleteCount}
-      </h2> 
-
+      {/* The ACTUAL list of stuff */}
       <ul className='todo-list'>
-        <h2>My Tasks</h2>
         {todos.map((task) => (
-          <li key={task.id} className='todo-item' style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
-            
+          <li key={task.id} className='todo-item' style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}> 
             <div style={{ flexBasis: '100%', display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
               <input 
                 type="checkbox" 
