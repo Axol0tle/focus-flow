@@ -1,5 +1,6 @@
-import {useState} from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
+import {supabase} from './supabase'
 
 // Basic ToDoList framwork
 function ToDoList() {
@@ -14,39 +15,85 @@ function ToDoList() {
     // IDs of the tasks that are currently "open"
     const [expandedTasks, setExpandedTasks] = useState([]);
 
+    // DATABASE: Fetch existing data when page loads
+    useEffect(() => {
+        const fetchTasks = async () => {
+            const { data, error } = await supabase
+                .from('items')
+                .select('*')
+                .order('created_at', { ascending: true }); // Or order by 'id'
+            
+            if (!error && data) {
+                setTodos(data);
+            }
+        };
+        fetchTasks();
+    }, []);
+
     // CREATE: Add a new task
-    const addTask = () => {
+    const addTask = async () => {
         if (inputValue.trim() === "") return; // prevent empty tasks
 
         const newTask = {
-        id: Date.now(), // unique ID based on date so React can track it (prevents repeat tasks being confused)
-        text: inputValue,
-        description: DescriptionValue,
-        dueDate: DueDateValue,
-        estimatedTime: estimatedTimeValue,
-        completed: false, // starts as not done
-        showDetails: false // starts with details hidden
+          text: inputValue,
+          description: DescriptionValue,
+          dueDate: DueDateValue,
+          estimatedTime: estimatedTimeValue,
+          completed: false, // starts as not done
         };
 
-        setTodos([...todos, newTask]); // Copy old list, add new task
-        setInputValue(""); // Clear the input box
-        setDescriptionValue(""); // Clear the description box
-        setDueDateValue(""); // Clears the due date box
-        setEstimatedTimeValue(""); // Clears the estimated time box
+        const { data, error } = await supabase
+          .from('items')
+          .insert([newTask])
+          .select();
+
+        if (error) {
+          console.error("Error adding task", error);
+        } else if (data) { 
+          setTodos([...todos, data[0]]); // Copy old list, add new task
+          setInputValue(""); // Clear the input box
+          setDescriptionValue(""); // Clear the description box
+          setDueDateValue(""); // Clears the due date box
+          setEstimatedTimeValue(""); // Clears the estimated time box
+        }
     };
 
     // UPDATE: Check or uncheck a task
-    const toggleTask = (id) => {
-        const updatedList = todos.map((task) => 
-        task.id === id ? { ...task, completed: !task.completed } : task
-        );
+    const toggleTask = async (id) => {
+        const taskToToggle = todos.find((task) => task.id === id); 
+        if (!taskToToggle) return;
+
+        const newStatus = !taskToToggle.completed;
+
+        const { error } = await supabase
+          .from('items')
+          .update({ completed: newStatus })
+          .eq('id', id);
+        if (error) {
+          console.error("Error updating task:", error);
+        } else {
+          const updatedList = todos.map((task) =>
+            task.id === id ? { ...task, completed: newStatus } : task
+          );
         setTodos(updatedList);
+        }
     };
 
     // DELETE: Remove a task completely
-    const deleteTask = (id) => {
-        const filteredList = todos.filter((task) => task.id !== id);
-        setTodos(filteredList);
+    const deleteTask = async (id) => {
+        // Delete from database
+        const { error } = await supabase
+            .from('items')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error("Error deleting task:", error);
+        } else {
+            // Update UI
+            const filteredList = todos.filter((task) => task.id !== id);
+            setTodos(filteredList);
+        }
     };
 
     // count the number of tasks incomplete
