@@ -38,7 +38,7 @@ function ToDoList() {
           text: inputValue,
           description: DescriptionValue,
           dueDate: DueDateValue,
-          estimatedTime: estimatedTimeValue,
+          estimatedTime: estimatedTimeValue === "" ? null : Number(estimatedTimeValue),
           completed: false, // starts as not done
         };
 
@@ -49,7 +49,10 @@ function ToDoList() {
 
         if (error) {
           console.error("Error adding task", error);
+          alert("Error: " + error.message);
         } else if (data) { 
+          const savedTask = { ...data[0], showDetails: false };
+
           setTodos([...todos, data[0]]); // Copy old list, add new task
           setInputValue(""); // Clear the input box
           setDescriptionValue(""); // Clear the description box
@@ -210,7 +213,11 @@ function ToDoList() {
 
             {expandedTasks.includes(task.id) && (
             <div className="todo-details-box">
-              <p><strong>Description:</strong> {task.description}</p>
+              <p className="task-description-text">
+                <strong>Description:</strong> 
+                <br />
+                {task.description}
+              </p>
               <p><strong>Due:</strong> {task.dueDate}</p>
               <p><strong>Estimated Time:</strong> {task.estimatedTime}h</p>
             </div>
