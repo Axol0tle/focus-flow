@@ -8,9 +8,7 @@ export default function Dashboard({ user, handleLogout }) {
       {/* Top Navigation Bar */}
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #ccc', paddingBottom: '10px' }}>
         <h2 style={{ margin: 0 }}>FocusFlow</h2>
-        <button 
-          onClick={handleLogout} 
-          style={{ padding: '8px 16px', cursor: 'pointer', backgroundColor: '#f44336', color: 'white', border: 'none', borderRadius: '4px' }}>
+        <button className='logout' onClick={handleLogout}>
           Logout
         </button>
       </header>

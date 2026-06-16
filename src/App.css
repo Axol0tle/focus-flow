@@ -191,6 +191,25 @@ body {
   }
 }
 
+
+.logout {
+  padding: 8px 16px;
+  background-color: #ff0022c4;
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff ;
+  border: 1px ;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.logout:hover {
+  background-color: #f31628; 
+  transform: translateY(-1px); /* lifts the button up by 1 pixels */
+  box-shadow: 0 4px 12px rgba(224, 10, 21, 0.3); /* adds a glowing shadow */
+}
+
 /* for <ul> container */
 .todo-list {
   list-style: none;
@@ -198,6 +217,37 @@ body {
   margin: 20px auto;
   width: 90%; 
   max-width: 400px;
+}
+
+/* Header as a whole */
+.task-header-row {
+  margin-top: 50px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;    
+  justify-content: center; 
+  gap: 10px;              
+  margin-bottom: 10px;
+  position: relative;
+  width: 100%
+}
+
+/* "My Tasks" */
+.task-header-title {
+  margin: 0;
+  color: #1e293b;
+}
+
+/* the counter */
+.task-counter-badge {
+  position: absolute;
+  right: 15px;
+  background-color: #e2e8f0; 
+  color: #475569;            
+  font-size: 13px;          
+  font-weight: 600;         
+  padding: 4px 10px;        
+  border-radius: 20px;       
 }
 
 /* for <li> row */
@@ -220,6 +270,57 @@ body {
   min-width: 0;              /* flexbox requirement so the container can actually shrink */
 }
 
+/* Clean up the arrow button */
+.icon-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px;
+  margin-right: 8px;
+  color: #555;
+  border-radius: 4px;
+}
+
+.icon-btn:hover {
+  background-color: rgba(0,0,0,0.05);
+}
+
+.delete-btn {
+  padding: 8px;
+  background: none;
+  color: #94a3b8; /* Subtle slate gray */
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+/* The Hover State: Soft red background, bright red icon */
+.delete-btn:hover {
+  background-color: #fee2e2; 
+  color: #ef4444; 
+}
+
+/* Style the dropdown box */
+.todo-details-box {
+  margin-top: 12px;
+  padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: rgba(255, 255, 255, 0.4); /* background */
+  border-radius: 8px;
+  border-left: 4px solid #4285F4; /* blue accent line on the left */
+  font-size: 14px;
+  text-align: left;
+}
+
+.todo-details-box p {
+  margin: 4px 0; /* Tightens up the spacing between text */
+}
 
 .task-form-card {
   background-color: #d8c7c7;
@@ -277,4 +378,10 @@ body {
 .form-submit-button:active {
   transform: translateY(0); /* pushes the button back down when clicked */
   box-shadow: none; /* removes the shadow while pressing */
+}
+
+.task-description-text {
+  white-space: pre-wrap; 
+  margin: 8px 0;         
+  line-height: 1.5;      
 }
