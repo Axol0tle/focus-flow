@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import {supabase} from './supabase'
+/* Icons Import*/
+import { FaRegTrashAlt } from "react-icons/fa"; 
+import { MdEdit } from "react-icons/md";
 
 // Basic ToDoList framwork
 function ToDoList() {
@@ -11,6 +14,10 @@ function ToDoList() {
     const [estimatedTimeValue, setEstimatedTimeValue] = useState("");
     // Memory for list of tasks
     const [todos, setTodos] = useState([]);
+
+    // EDITING: Memory for which task is being edited and its temporary values
+    const [editingTaskId, setEditingTaskId] = useState(null);
+    const [editValues, setEditValues] = useState({ text: "", description: "", dueDate: "", estimatedTime: "" });
 
     // IDs of the tasks that are currently "open"
     const [expandedTasks, setExpandedTasks] = useState([]);
@@ -79,6 +86,58 @@ function ToDoList() {
             task.id === id ? { ...task, completed: newStatus } : task
           );
         setTodos(updatedList);
+        }
+    };
+
+    // EDIT: Start editing a specific task
+    const startEditing = (task) => {
+        setEditingTaskId(task.id);
+        // fill the temporary memory with the task's current data
+        setEditValues({ 
+            text: task.text, 
+            description: task.description || "", 
+            dueDate: task.dueDate || "", 
+            estimatedTime: task.estimatedTime || "" 
+        });
+        // make sure the details box is open so they can see all the fields
+        if (!expandedTasks.includes(task.id)) {
+            setExpandedTasks([...expandedTasks, task.id]);
+        }
+    };
+
+    // EDIT: Cancel editing
+    const cancelEditing = () => {
+        setEditingTaskId(null);
+    };
+
+    // EDIT: Save changes to database
+    const saveEdit = async (id) => {
+        if (editValues.text.trim() === "") return; // Don't save an empty title
+
+        // 1. prep data for DB
+        const updatedData = {
+            text: editValues.text,
+            description: editValues.description,
+            dueDate: editValues.dueDate,
+            estimatedTime: editValues.estimatedTime === "" ? null : Number(editValues.estimatedTime)
+        };
+
+        // 2. save to Supabase
+        const { error } = await supabase
+            .from('items')
+            .update(updatedData)
+            .eq('id', id);
+
+        if (error) {
+            console.error("Error saving edit:", error.message);
+            alert("Failed to save edits.");
+        } else {
+            // 3. update UI
+            const updatedList = todos.map((task) =>
+                task.id === id ? { ...task, ...updatedData } : task
+            );
+            setTodos(updatedList);
+            setEditingTaskId(null); // Close edit mode
         }
     };
 
@@ -173,6 +232,46 @@ function ToDoList() {
       <ul className='todo-list'>
         {todos.map((task) => (
           <li key={task.id} className='todo-item' style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}> 
+            {/*Editing UI*/}
+            {editingTaskId === task.id ? (
+              <div style={{ flexBasis: '100%', display: 'flex', flexDirection: 'column', gap: '10px', padding: '10px 0' }}>
+                <input 
+                  type="text" 
+                  value={editValues.text}
+                  onChange={(e) => setEditValues({...editValues, text: e.target.value})}
+                  className="form-input"
+                />
+                <textarea 
+                  value={editValues.description}
+                  onChange={(e) => setEditValues({...editValues, description: e.target.value})}
+                  className="form-input"
+                  rows="2"
+                />
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <input 
+                    type="date" 
+                    value={editValues.dueDate}
+                    onChange={(e) => setEditValues({...editValues, dueDate: e.target.value})}
+                    className="form-input"
+                  />
+                  <input 
+                    type="number" 
+                    value={editValues.estimatedTime}
+                    onChange={(e) => setEditValues({...editValues, estimatedTime: e.target.value})}
+                    className="form-input"
+                    placeholder="Hours"
+                  />
+                </div>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
+                  <button className ='save' onClick={() => saveEdit(task.id)}>Save</button>
+                  <button className ='logout' onClick={cancelEditing}>Cancel</button>
+                </div>
+              </div>
+
+            ) : (
+
+            /* Normal Display UI */
+            <> 
             <div style={{ flexBasis: '100%', display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
               <input 
                 type="checkbox" 
@@ -195,18 +294,14 @@ function ToDoList() {
                 {expandedTasks.includes(task.id) ? '▲' : '▼'}
               </button>
 
+              {/* The Edit Button */}
+              <button className="edit-btn" onClick={() => startEditing(task)} style={{ marginLeft: '10px' }}>
+                <MdEdit size={22}/>
+              </button>
+
               {/* The Delete Button */}
               <button className="delete-btn" onClick={() => deleteTask(task.id)}>
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  width="24" height="24" viewBox="0 0 24 24" 
-                  fill="none" stroke="currentColor" stroke-width="2" 
-                  stroke-linecap="round" 
-                  stroke-linejoin="round" 
-                  class="lucide lucide-trash2-icon lucide-trash-2"
-                >
-                  <path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                </svg>
+                <FaRegTrashAlt size={22} />
               </button>
 
             </div>  
@@ -222,7 +317,8 @@ function ToDoList() {
               <p><strong>Estimated Time:</strong> {task.estimatedTime}h</p>
             </div>
             )}
-
+          </>
+          )}
           </li>
         ))}
       </ul>

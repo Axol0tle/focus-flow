@@ -277,9 +277,9 @@ body {
   font-size: 14px;
   cursor: pointer;
   padding: 8px;
-  margin-right: 8px;
-  color: #555;
-  border-radius: 4px;
+  margin-right: 0px;
+  color: #555555;
+  border-radius: 6px;
 }
 
 .icon-btn:hover {
@@ -303,6 +303,24 @@ body {
 .delete-btn:hover {
   background-color: #fee2e2; 
   color: #ef4444; 
+}
+
+.edit-btn {
+  padding: 8px;
+  background: none;
+  color: #94a3b8; /* Subtle slate gray */
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.edit-btn:hover {
+  background-color: rgba(0,0,0,0.05); 
+  color: #353434; 
 }
 
 /* Style the dropdown box */
@@ -384,4 +402,22 @@ body {
   white-space: pre-wrap; 
   margin: 8px 0;         
   line-height: 1.5;      
+}
+
+.save {
+  padding: 8px 16px;
+  background-color: #27ca11c4;
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff ;
+  border: 1px ;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.save:hover {
+  background-color: #4bd117; 
+  transform: translateY(-1px); /* lifts the button up by 1 pixels */
+  box-shadow: 0 4px 12px rgba(10, 224, 39, 0.3); /* adds a glowing shadow */
 }
