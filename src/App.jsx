@@ -2,9 +2,25 @@ import { useState, useEffect } from 'react';
 import { supabase } from './supabase';
 import Login from './Login';
 import Dashboard from './Dashboard';
+import OneSignal from 'react-onesignal';
 
 function App() {
   const [user, setUser] = useState(null);
+
+  // For OneSignal
+  useEffect(() => {
+    const runOneSignal = async () => {
+      await OneSignal.init({
+        appId: "a6c62313-30aa-487b-8401-ca6b9cf4f1ba", // <-- Put your App ID from Step 1 here!
+        allowLocalhostAsSecureOrigin: true, // Needed for local testing
+      });
+      
+      // show the native browser prompt to ask for permission
+      OneSignal.Slidedown.promptPush();
+    };
+
+    runOneSignal();
+  }, []);
 
   // This checks if the user is already logged in when they open the app
   useEffect(() => {
