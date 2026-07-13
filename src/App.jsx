@@ -7,7 +7,6 @@ import OneSignal from 'react-onesignal';
 function App() {
   const [user, setUser] = useState(null);
 
-  // For OneSignal
   // For OneSignal - Setup and Prompt
   useEffect(() => {
     const runOneSignal = async () => {
@@ -21,14 +20,10 @@ function App() {
         // catch the error if React tries to initialize it twice, and just ignore it
       }
 
-      // only show the prompt if a user is successfully logged in
-      if (user) {
-        OneSignal.Slidedown.promptPush();
-      }
     };
 
     runOneSignal();
-  }, [user]); // <--- Adding 'user' here tells React to run this check again the moment they log in!
+  }, [user]); // adding user tells React to run check again once they log in
 
   // Save OneSignal ID to Supabase
   useEffect(() => {
