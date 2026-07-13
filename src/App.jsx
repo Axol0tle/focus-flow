@@ -8,19 +8,27 @@ function App() {
   const [user, setUser] = useState(null);
 
   // For OneSignal
+  // For OneSignal - Setup and Prompt
   useEffect(() => {
     const runOneSignal = async () => {
-      await OneSignal.init({
-        appId: "a6c62313-30aa-487b-8401-ca6b9cf4f1ba", 
-        allowLocalhostAsSecureOrigin: true, // Needed for local testing
-      });
-      
-      // show the native browser prompt to ask for permission
-      OneSignal.Slidedown.promptPush();
+      try {
+        // wake up OneSignal in the background
+        await OneSignal.init({
+          appId: "a6c62313-30aa-487b-8401-ca6b9cf4f1ba", 
+          allowLocalhostAsSecureOrigin: true, 
+        });
+      } catch (error) {
+        // catch the error if React tries to initialize it twice, and just ignore it
+      }
+
+      // only show the prompt if a user is successfully logged in
+      if (user) {
+        OneSignal.Slidedown.promptPush();
+      }
     };
 
     runOneSignal();
-  }, []);
+  }, [user]); // <--- Adding 'user' here tells React to run this check again the moment they log in!
 
   // Save OneSignal ID to Supabase
   useEffect(() => {
