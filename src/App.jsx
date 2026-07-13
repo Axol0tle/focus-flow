@@ -19,6 +19,9 @@ function App() {
       OneSignal.Slidedown.promptPush();
     };
 
+    runOneSignal();
+  }, []);
+
   // Save OneSignal ID to Supabase
   useEffect(() => {
     // if user is logged in
@@ -52,9 +55,6 @@ function App() {
       OneSignal.User.PushSubscription.removeEventListener('change', handleSubscriptionChange);
     };
   }, [user]);
-
-    runOneSignal();
-  }, []);
 
   // This checks if the user is already logged in when they open the app
   useEffect(() => {
