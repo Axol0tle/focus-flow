@@ -35,9 +35,13 @@ function App() {
 
         // update the user's row in Supabase
         const { data, error } = await supabase
-          .from('items') 
-          .update({ onesignal_id: onesignalId })
-          .eq('id', user.id); // match the logged-in user's ID
+          .from('profiles') 
+          .upsert({
+            id: user.id,
+            onesignal_id: onesignalId 
+          })
+          .select();
+            
 
         if (error) {
           console.error("Error saving to Supabase:", error);
