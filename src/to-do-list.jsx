@@ -1,11 +1,31 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-import {supabase} from './supabase'
+import { supabase } from './supabase';
 /* Icons Import*/
 import { FaRegTrashAlt } from "react-icons/fa"; 
 import { MdEdit } from "react-icons/md";
 
-// Basic ToDoList framwork
+// Helper 1: Forces the time to be saved with your exact local timezone (e.g., +08:00)
+const formatForDatabase = (htmlDateString) => {
+    if (!htmlDateString) return null;
+    const offset = new Date().getTimezoneOffset();
+    const sign = offset > 0 ? "-" : "+";
+    const pad = (num) => String(num).padStart(2, '0');
+    const hours = pad(Math.floor(Math.abs(offset) / 60));
+    const minutes = pad(Math.abs(offset) % 60);
+    // Creates exactly: "2026-07-15T19:59+08:00"
+    return `${htmlDateString}${sign}${hours}:${minutes}`;
+};
+
+// Helper 2: Formats the database timestamp back into the exact format the HTML input needs
+const formatForHTMLInput = (dbDateString) => {
+    if (!dbDateString) return "";
+    const d = new Date(dbDateString);
+    const pad = (num) => String(num).padStart(2, '0');
+    // Forces the display to use local year, month, date, and hours
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
 function ToDoList() {
     // Memory for whats typed
     const [inputValue, setInputValue] = useState("");
@@ -28,7 +48,7 @@ function ToDoList() {
             const { data, error } = await supabase
                 .from('items')
                 .select('*')
-                .order('created_at', { ascending: true }); // Or order by 'id'
+                .order('created_at', { ascending: true }); 
             
             if (!error && data) {
                 setTodos(data);
@@ -44,7 +64,7 @@ function ToDoList() {
         const newTask = {
           text: inputValue,
           description: DescriptionValue,
-          dueDate: DueDateValue,
+          dueDate: formatForDatabase(DueDateValue), // Using the new bulletproof helper
           estimatedTime: estimatedTimeValue === "" ? null : Number(estimatedTimeValue),
           completed: false, // starts as not done
         };
@@ -58,13 +78,11 @@ function ToDoList() {
           console.error("Error adding task", error);
           alert("Error: " + error.message);
         } else if (data) { 
-          const savedTask = { ...data[0], showDetails: false };
-
           setTodos([...todos, data[0]]); // Copy old list, add new task
-          setInputValue(""); // Clear the input box
-          setDescriptionValue(""); // Clear the description box
-          setDueDateValue(""); // Clears the due date box
-          setEstimatedTimeValue(""); // Clears the estimated time box
+          setInputValue(""); 
+          setDescriptionValue(""); 
+          setDueDateValue(""); 
+          setEstimatedTimeValue(""); 
         }
     };
 
@@ -92,20 +110,11 @@ function ToDoList() {
     // EDIT: Start editing a specific task
     const startEditing = (task) => {
         setEditingTaskId(task.id);
-
-         // format the database timestamp into the YYYY-MM-DDTHH:mm format that the HTML input needs
-        let formattedDate = "";
-        if (task.dueDate) {
-            const d = new Date(task.dueDate);
-            // Adjust for the user's local timezone
-            formattedDate = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
-        }
-
         // fill the temporary memory with the task's current data
         setEditValues({ 
             text: task.text, 
             description: task.description || "", 
-            dueDate: formattedDate, 
+            dueDate: formatForHTMLInput(task.dueDate), // Using the new bulletproof helper
             estimatedTime: task.estimatedTime || "" 
         });
         // make sure the details box is open so they can see all the fields
@@ -127,7 +136,7 @@ function ToDoList() {
         const updatedData = {
             text: editValues.text,
             description: editValues.description,
-            dueDate: editValues.dueDate,
+            dueDate: formatForDatabase(editValues.dueDate), // Using the new helper
             estimatedTime: editValues.estimatedTime === "" ? null : Number(editValues.estimatedTime)
         };
 
@@ -223,8 +232,6 @@ function ToDoList() {
           placeholder = "Hours to Complete"
           className='form-input'
         />
-
-
       </div>
         <button className="form-submit-button" onClick={addTask} >Add Task</button>
     </div>
@@ -334,6 +341,5 @@ function ToDoList() {
     </div>
   );
 }
-
 
 export default ToDoList;
