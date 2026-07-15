@@ -92,11 +92,20 @@ function ToDoList() {
     // EDIT: Start editing a specific task
     const startEditing = (task) => {
         setEditingTaskId(task.id);
+
+         // format the database timestamp into the YYYY-MM-DDTHH:mm format that the HTML input needs
+        let formattedDate = "";
+        if (task.dueDate) {
+            const d = new Date(task.dueDate);
+            // Adjust for the user's local timezone
+            formattedDate = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+        }
+
         // fill the temporary memory with the task's current data
         setEditValues({ 
             text: task.text, 
             description: task.description || "", 
-            dueDate: task.dueDate || "", 
+            dueDate: formattedDate, 
             estimatedTime: task.estimatedTime || "" 
         });
         // make sure the details box is open so they can see all the fields
@@ -202,7 +211,7 @@ function ToDoList() {
 
       <div style = {{display: 'flex', gap: '10px'}}>
         <input
-          type = "date"
+          type = "datetime-local"
           value = {DueDateValue}
           onChange = {(e) => setDueDateValue(e.target.value)}
           className='form-input'
@@ -249,7 +258,7 @@ function ToDoList() {
                 />
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <input 
-                    type="date" 
+                    type="datetime-local" 
                     value={editValues.dueDate}
                     onChange={(e) => setEditValues({...editValues, dueDate: e.target.value})}
                     className="form-input"
@@ -313,7 +322,7 @@ function ToDoList() {
                 <br />
                 {task.description}
               </p>
-              <p><strong>Due:</strong> {task.dueDate}</p>
+              <p><strong>Due:</strong> {task.dueDate ? new Date(task.dueDate).toLocaleString() : 'No date set'}</p>
               <p><strong>Estimated Time:</strong> {task.estimatedTime}h</p>
             </div>
             )}
