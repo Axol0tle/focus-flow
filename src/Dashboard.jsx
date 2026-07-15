@@ -6,18 +6,21 @@ import { useState, useEffect } from 'react';
 
 export default function Dashboard({ user, handleLogout }) {
   // state to track if they are subscribed
-  const [isSubscribed, setIsSubscribed] = useState(false);
+   const [isSubscribed, setIsSubscribed] = useState(
+    window.Notification && window.Notification.permission === 'granted'
+  );
+  const [isBlocked, setIsBlocked] = useState(
+    window.Notification && window.Notification.permission === 'denied'
+  );
 
   // useEffect to check status and listen for the allow button
   useEffect(() => {
-    // check if they are ALREADY subscribed when they load the page
-    if (OneSignal.User.PushSubscription.optedIn) {
-      setIsSubscribed(true);
-    }
-
-    // listen for the exact moment they click "Allow" in the browser
+    // Listen for the exact moment they click "Allow" or "Block" in the browser prompt
     const handleSubscriptionChange = (event) => {
       setIsSubscribed(event.current.optedIn);
+      if (window.Notification && window.Notification.permission === 'denied') {
+        setIsBlocked(true);
+      }
     };
 
     OneSignal.User.PushSubscription.addEventListener('change', handleSubscriptionChange);
@@ -57,24 +60,50 @@ export default function Dashboard({ user, handleLogout }) {
           textAlign: 'center' 
         }}>
           <h3 style={{ margin: '0 0 8px 0', color: '#1e293b' }}>Never miss a task!</h3>
-          <p style={{ margin: '0 0 16px 0', color: '#64748b' }}>
-            Turn on reminders to get pinged when a task is due.
-          </p>
-          
-          <button 
-            onClick={() => OneSignal.User.PushSubscription.optIn()}
-            style={{ 
-              backgroundColor: '#267bca', 
-              color: 'white', 
-              padding: '10px 24px', 
-              borderRadius: '8px', 
-              border: 'none', 
-              fontWeight: 'bold',
-              cursor: 'pointer' 
-            }}
-          >
-            Enable Notifications
-          </button>
+           {isBlocked ? (
+            /* What they see if they clicked Block */
+            <>
+              <p style={{ margin: '0 0 16px 0', color: '#ef4444' }}>
+                Notifications are blocked! Reset permissions to enable them.
+              </p>
+              <button 
+                disabled
+                style={{ 
+                  backgroundColor: '#94a3b8', 
+                  color: 'white', 
+                  padding: '10px 24px', 
+                  borderRadius: '8px', 
+                  border: 'none', 
+                  fontWeight: 'bold',
+                  cursor: 'not-allowed' 
+                }}
+              >
+                Notifications Blocked
+              </button>
+            </>
+          ) : (
+            /* What they see normally */
+            <>
+              <p style={{ margin: '0 0 16px 0', color: '#64748b' }}>
+                Turn on reminders to get pinged when a task is due.
+              </p>
+              
+              <button 
+                onClick={() => OneSignal.User.PushSubscription.optIn()}
+                style={{ 
+                  backgroundColor: '#267bca', 
+                  color: 'white', 
+                  padding: '10px 24px', 
+                  borderRadius: '8px', 
+                  border: 'none', 
+                  fontWeight: 'bold',
+                  cursor: 'pointer' 
+                }}
+              >
+                Enable Notifications
+              </button>
+            </>
+          )}
         </div>
       )}
 
