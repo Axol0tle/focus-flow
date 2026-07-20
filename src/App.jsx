@@ -7,20 +7,61 @@ import OneSignal from 'react-onesignal';
 function App() {
   const [user, setUser] = useState(null);
 
-  // For OneSignal
+  // For OneSignal - Setup and Prompt
   useEffect(() => {
     const runOneSignal = async () => {
-      await OneSignal.init({
-        appId: "a6c62313-30aa-487b-8401-ca6b9cf4f1ba", // <-- Put your App ID from Step 1 here!
-        allowLocalhostAsSecureOrigin: true, // Needed for local testing
-      });
-      
-      // show the native browser prompt to ask for permission
-      OneSignal.Slidedown.promptPush();
+      try {
+        // wake up OneSignal in the background
+        await OneSignal.init({
+          appId: "a6c62313-30aa-487b-8401-ca6b9cf4f1ba", 
+          allowLocalhostAsSecureOrigin: true, 
+        });
+      } catch (error) {
+        // catch the error if React tries to initialize it twice, and just ignore it
+      }
+
     };
 
     runOneSignal();
-  }, []);
+  }, [user]); // adding user tells React to run check again once they log in
+
+  // Save OneSignal ID to Supabase
+  useEffect(() => {
+    // if user is logged in
+    if (!user) return;
+
+    const handleSubscriptionChange = async (event) => {
+      // check if they just opted in (clicked "Allow")
+      if (event.current.optedIn) {
+        const onesignalId = event.current.id; 
+        console.log("Success! Your OneSignal ID is:", onesignalId);
+
+        // update the user's row in Supabase
+        const { data, error } = await supabase
+          .from('profiles') 
+          .upsert({
+            id: user.id,
+            onesignal_id: onesignalId 
+          })
+          .select();
+            
+
+        if (error) {
+          console.error("Error saving to Supabase:", error);
+        } else {
+          console.log("Saved ID to database successfully!");
+        }
+      }
+    };
+
+    // tell onesignal to listen for the user clicking "Allow"
+    OneSignal.User.PushSubscription.addEventListener('change', handleSubscriptionChange);
+
+    // cleanup listener when component unmounts
+    return () => {
+      OneSignal.User.PushSubscription.removeEventListener('change', handleSubscriptionChange);
+    };
+  }, [user]);
 
   // This checks if the user is already logged in when they open the app
   useEffect(() => {
