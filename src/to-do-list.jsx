@@ -4,6 +4,7 @@ import {supabase} from './supabase'
 /* Icons Import*/
 import { FaRegTrashAlt } from "react-icons/fa"; 
 import { MdEdit } from "react-icons/md";
+import { FaArrowUp, FaArrowDown } from "react-icons/fa";
 
 // Basic ToDoList framwork
 function ToDoList() {
@@ -28,7 +29,7 @@ function ToDoList() {
             const { data, error } = await supabase
                 .from('items')
                 .select('*')
-                .order('created_at', { ascending: true }); // Or order by 'id'
+                .order('position', { ascending: true }); // Order by position
             
             if (!error && data) {
                 setTodos(data);
@@ -41,12 +42,16 @@ function ToDoList() {
     const addTask = async () => {
         if (inputValue.trim() === "") return; // prevent empty tasks
 
+        // Find the highest position and add 1 for the new task
+        const maxPosition = todos.reduce((max, todo) => Math.max(todo.position || 0, max), 0);
+
         const newTask = {
           text: inputValue,
           description: DescriptionValue,
           dueDate: DueDateValue,
           estimatedTime: estimatedTimeValue === "" ? null : Number(estimatedTimeValue),
           completed: false, // starts as not done
+          position: maxPosition + 1,
         };
 
         const { data, error } = await supabase
@@ -155,6 +160,44 @@ function ToDoList() {
             // Update UI
             const filteredList = todos.filter((task) => task.id !== id);
             setTodos(filteredList);
+        }
+    };
+
+    // REORDER: Move a task up or down
+    const moveTask = async (id, direction) => {
+        const taskIndex = todos.findIndex((task) => task.id === id);
+        if (taskIndex === -1) return;
+
+        const isMovingUp = direction === 'up';
+        if ((isMovingUp && taskIndex === 0) || (!isMovingUp && taskIndex === todos.length - 1)) {
+            return; // Can't move first item up or last item down
+        }
+
+        const otherTaskIndex = isMovingUp ? taskIndex - 1 : taskIndex + 1;
+
+        const taskToMove = todos[taskIndex];
+        const otherTask = todos[otherTaskIndex];
+
+        // Swap positions
+        const updates = [
+            { id: taskToMove.id, position: otherTask.position },
+            { id: otherTask.id, position: taskToMove.position },
+        ];
+
+        const { error } = await supabase.from('items').upsert(updates);
+
+        if (error) {
+            console.error("Error reordering tasks:", error.message);
+            alert("Failed to reorder tasks.");
+        } else {
+            // Update UI optimistically
+            const newTodos = [...todos];
+            // Simple swap in the array for instant UI feedback
+            [newTodos[taskIndex], newTodos[otherTaskIndex]] = [newTodos[otherTaskIndex], newTodos[taskIndex]];
+            // We also need to swap the actual position properties to keep them consistent
+            [newTodos[taskIndex].position, newTodos[otherTaskIndex].position] = [newTodos[otherTaskIndex].position, newTodos[taskIndex].position];
+
+            setTodos(newTodos);
         }
     };
 
@@ -286,6 +329,16 @@ function ToDoList() {
                 {task.text}
               </span>
             
+              {/* Reorder Buttons */}
+              <div style={{ display: 'flex', flexDirection: 'column', marginRight: '10px' }}>
+                <button className="icon-btn" onClick={() => moveTask(task.id, 'up')} style={{ padding: '4px' }}>
+                  <FaArrowUp size={14} />
+                </button>
+                <button className="icon-btn" onClick={() => moveTask(task.id, 'down')} style={{ padding: '4px' }}>
+                  <FaArrowDown size={14} />
+                </button>
+              </div>
+
               {/* The Arrow Toggle Button */}
               <button 
                 className="icon-btn" 
@@ -294,7 +347,7 @@ function ToDoList() {
                 {expandedTasks.includes(task.id) ? '▲' : '▼'}
               </button>
 
-              {/* The Edit Button */}
+              {/* The Edit Button */} 
               <button className="edit-btn" onClick={() => startEditing(task)} style={{ marginLeft: '10px' }}>
                 <MdEdit size={22}/>
               </button>
