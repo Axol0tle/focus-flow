@@ -4,6 +4,7 @@ import { supabase } from './supabase';
 /* Icons Import*/
 import { FaRegTrashAlt } from "react-icons/fa"; 
 import { MdEdit } from "react-icons/md";
+import { FaArrowUp, FaArrowDown } from "react-icons/fa";
 
 // Helper 1: Forces the time to be saved with your exact local timezone (e.g., +08:00)
 const formatForDatabase = (htmlDateString) => {
@@ -48,7 +49,7 @@ function ToDoList() {
             const { data, error } = await supabase
                 .from('items')
                 .select('*')
-                .order('created_at', { ascending: true }); 
+                .order('position', { ascending: true, nullsFirst: false }); 
             
             if (!error && data) {
                 setTodos(data);
@@ -61,11 +62,14 @@ function ToDoList() {
     const addTask = async () => {
         if (inputValue.trim() === "") return; // prevent empty tasks
 
+        const newPosition = todos.length > 0 ? Math.max(...todos.map(t => t.position || 0)) + 1 : 0;
+
         const newTask = {
           text: inputValue,
           description: DescriptionValue,
           dueDate: formatForDatabase(DueDateValue), // Using the new bulletproof helper
           estimatedTime: estimatedTimeValue === "" ? null : Number(estimatedTimeValue),
+          position: newPosition,
           completed: false, // starts as not done
         };
 
@@ -190,6 +194,54 @@ function ToDoList() {
       }
     };
 
+    // Reorder task up
+    const moveTaskUp = async (index) => {
+        if (index === 0) return; // can't move up if it's the first item
+        const newTodos = [...todos];
+        // Swap positions
+        [newTodos[index], newTodos[index - 1]] = [newTodos[index - 1], newTodos[index]];
+
+        // Update the UI immediately for a snappy feel
+        setTodos(newTodos);
+
+        // Update the 'position' in the database for the two swapped tasks
+        const { error } = await supabase.from('items').upsert([
+            { id: newTodos[index].id, position: index },
+            { id: newTodos[index - 1].id, position: index - 1 }
+        ]);
+
+        if (error) {
+            console.error("Error moving task up:", error);
+            // If the DB update fails, revert the UI to the original order
+            setTodos(todos);
+            alert("Error saving new order.");
+        }
+    };
+
+    // Reorder task down
+    const moveTaskDown = async (index) => {
+        if (index === todos.length - 1) return; // can't move down if it's the last item
+        const newTodos = [...todos];
+        // Swap positions
+        [newTodos[index], newTodos[index + 1]] = [newTodos[index + 1], newTodos[index]];
+
+        // Update UI immediately
+        setTodos(newTodos);
+
+        // Update the 'position' in the database
+        const { error } = await supabase.from('items').upsert([
+            { id: newTodos[index].id, position: index },
+            { id: newTodos[index + 1].id, position: index + 1 }
+        ]);
+
+        if (error) {
+            console.error("Error moving task down:", error);
+            // Revert UI on failure
+            setTodos(todos);
+            alert("Error saving new order.");
+        }
+    };
+
     // Visual stuff
     return (
     <div style={{ 
@@ -246,7 +298,7 @@ function ToDoList() {
 
       {/* The ACTUAL list of stuff */}
       <ul className='todo-list'>
-        {todos.map((task) => (
+        {todos.map((task, index) => (
           <li key={task.id} className='todo-item' style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}> 
             {/*Editing UI*/}
             {editingTaskId === task.id ? (
@@ -307,8 +359,17 @@ function ToDoList() {
                 className="icon-btn" 
                 onClick={() => toggleDetails(task.id)}
               >
-                {expandedTasks.includes(task.id) ? '▲' : '▼'}
+                {expandedTasks.includes(task.id) ? 'Less Details' : 'More Details'}
               </button>
+
+              {/* Reorder Buttons */}
+              <button className="icon-btn" onClick={() => moveTaskUp(index)} disabled={index === 0} title="Move up">
+                <FaArrowUp />
+              </button>
+              <button className="icon-btn" onClick={() => moveTaskDown(index)} disabled={index === todos.length - 1} title="Move down">
+                <FaArrowDown />
+              </button>
+
 
               {/* The Edit Button */}
               <button className="edit-btn" onClick={() => startEditing(task)} style={{ marginLeft: '10px' }}>
@@ -337,7 +398,7 @@ function ToDoList() {
           )}
           </li>
         ))}
-      </ul>
+      </ul> 
     </div>
   );
 }
