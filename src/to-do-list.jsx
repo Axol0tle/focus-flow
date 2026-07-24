@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import { supabase } from './supabase';
+import { getSmartSortedOrder } from './llm';
 /* Icons Import*/
 import { FaRegTrashAlt } from "react-icons/fa"; 
 import { MdEdit } from "react-icons/md";
 import { FaArrowUp, FaArrowDown } from "react-icons/fa";
+import { FaWandMagicSparkles } from "react-icons/fa6";
 
 // Helper 1: Forces the time to be saved with your exact local timezone (e.g., +08:00)
 const formatForDatabase = (htmlDateString) => {
@@ -35,6 +37,9 @@ function ToDoList() {
     const [estimatedTimeValue, setEstimatedTimeValue] = useState("");
     // Memory for list of tasks
     const [todos, setTodos] = useState([]);
+
+    // Loading state for the smart sort
+    const [isSorting, setIsSorting] = useState(false);
 
     // EDITING: Memory for which task is being edited and its temporary values
     const [editingTaskId, setEditingTaskId] = useState(null);
@@ -242,6 +247,43 @@ function ToDoList() {
         }
     };
 
+    // LLM-powered Smart Sort
+    const handleSmartSort = async () => {
+        if (todos.length < 2) return; // No need to sort
+
+        setIsSorting(true);
+        try {
+            const sortedIds = await getSmartSortedOrder(todos);
+
+            // Create a map for quick lookups
+            const taskMap = new Map(todos.map(task => [task.id, task]));
+
+            // Create the new sorted array based on the LLM's response
+            const newSortedTodos = sortedIds.map(id => taskMap.get(id)).filter(Boolean);
+
+            // Create the data payload for Supabase with new positions
+            const updates = newSortedTodos.map((task, index) => ({
+                id: task.id,
+                position: index
+            }));
+
+            // Update the database
+            const { error } = await supabase.from('items').upsert(updates);
+
+            if (error) {
+                throw new Error(`Error updating positions in database: ${error.message}`);
+            }
+
+            // Update the UI
+            setTodos(newSortedTodos);
+        } catch (error) {
+            console.error("Smart sort failed:", error);
+            alert("Smart sort failed. Please check the console for details and ensure your API key is correct.");
+        } finally {
+            setIsSorting(false);
+        }
+    };
+
     // Visual stuff
     return (
     <div style={{ 
@@ -294,6 +336,14 @@ function ToDoList() {
         <div className="task-counter-badge">
           {incompleteCount} Left
         </div>
+        <button 
+          className="smart-sort-button" 
+          onClick={handleSmartSort}
+          disabled={isSorting}
+          title="Smart Sort with AI"
+        >
+          <FaWandMagicSparkles /> {isSorting ? 'Sorting...' : 'Smart Sort'}
+        </button>
       </div>
 
       {/* The ACTUAL list of stuff */}
