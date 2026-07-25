@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import { supabase } from './supabase';
+import { getSmartSortedOrder } from './llm';
 /* Icons Import*/
 import { FaRegTrashAlt } from "react-icons/fa"; 
 import { MdEdit } from "react-icons/md";
+import { FaArrowUp, FaArrowDown } from "react-icons/fa";
+import { FaWandMagicSparkles } from "react-icons/fa6";
 
 // Helper 1: Forces the time to be saved with your exact local timezone (e.g., +08:00)
 const formatForDatabase = (htmlDateString) => {
@@ -35,6 +38,9 @@ function ToDoList() {
     // Memory for list of tasks
     const [todos, setTodos] = useState([]);
 
+    // Loading state for the smart sort
+    const [isSorting, setIsSorting] = useState(false);
+
     // EDITING: Memory for which task is being edited and its temporary values
     const [editingTaskId, setEditingTaskId] = useState(null);
     const [editValues, setEditValues] = useState({ text: "", description: "", dueDate: "", estimatedTime: "" });
@@ -48,7 +54,7 @@ function ToDoList() {
             const { data, error } = await supabase
                 .from('items')
                 .select('*')
-                .order('created_at', { ascending: true }); 
+                .order('position', { ascending: true, nullsFirst: false }); 
             
             if (!error && data) {
                 setTodos(data);
@@ -61,11 +67,14 @@ function ToDoList() {
     const addTask = async () => {
         if (inputValue.trim() === "") return; // prevent empty tasks
 
+        const newPosition = todos.length > 0 ? Math.max(...todos.map(t => t.position || 0)) + 1 : 0;
+
         const newTask = {
           text: inputValue,
           description: DescriptionValue,
           dueDate: formatForDatabase(DueDateValue), // Using the new bulletproof helper
           estimatedTime: estimatedTimeValue === "" ? null : Number(estimatedTimeValue),
+          position: newPosition,
           completed: false, // starts as not done
         };
 
@@ -190,6 +199,91 @@ function ToDoList() {
       }
     };
 
+    // Reorder task up
+    const moveTaskUp = async (index) => {
+        if (index === 0) return; // can't move up if it's the first item
+        const newTodos = [...todos];
+        // Swap positions
+        [newTodos[index], newTodos[index - 1]] = [newTodos[index - 1], newTodos[index]];
+
+        // Update the UI immediately for a snappy feel
+        setTodos(newTodos);
+
+        // Update the 'position' in the database for the two swapped tasks
+        const { error } = await supabase.from('items').upsert([
+            { id: newTodos[index].id, position: index },
+            { id: newTodos[index - 1].id, position: index - 1 }
+        ]);
+
+        if (error) {
+            console.error("Error moving task up:", error);
+            // If the DB update fails, revert the UI to the original order
+            setTodos(todos);
+            alert("Error saving new order.");
+        }
+    };
+
+    // Reorder task down
+    const moveTaskDown = async (index) => {
+        if (index === todos.length - 1) return; // can't move down if it's the last item
+        const newTodos = [...todos];
+        // Swap positions
+        [newTodos[index], newTodos[index + 1]] = [newTodos[index + 1], newTodos[index]];
+
+        // Update UI immediately
+        setTodos(newTodos);
+
+        // Update the 'position' in the database
+        const { error } = await supabase.from('items').upsert([
+            { id: newTodos[index].id, position: index },
+            { id: newTodos[index + 1].id, position: index + 1 }
+        ]);
+
+        if (error) {
+            console.error("Error moving task down:", error);
+            // Revert UI on failure
+            setTodos(todos);
+            alert("Error saving new order.");
+        }
+    };
+
+    // LLM-powered Smart Sort
+    const handleSmartSort = async () => {
+        if (todos.length < 2) return; // No need to sort
+
+        setIsSorting(true);
+        try {
+            const sortedIds = await getSmartSortedOrder(todos);
+
+            // Create a map for quick lookups
+            const taskMap = new Map(todos.map(task => [task.id, task]));
+
+            // Create the new sorted array based on the LLM's response
+            const newSortedTodos = sortedIds.map(id => taskMap.get(id)).filter(Boolean);
+
+            // Create the data payload for Supabase with new positions
+            const updates = newSortedTodos.map((task, index) => ({
+                id: task.id,
+                position: index
+            }));
+
+            // Update the database
+            const { error } = await supabase.from('items').upsert(updates);
+
+            if (error) {
+                throw new Error(`Error updating positions in database: ${error.message}`);
+            }
+
+            // Update the UI
+            setTodos(newSortedTodos);
+        } catch (error) {
+            console.error("Smart sort failed:", error);
+            alert("Smart sort failed. Please check the console for details and ensure your API key is correct.");
+        } finally {
+            setIsSorting(false);
+        }
+    };
+
     // Visual stuff
     return (
     <div style={{ 
@@ -242,11 +336,19 @@ function ToDoList() {
         <div className="task-counter-badge">
           {incompleteCount} Left
         </div>
+        <button 
+          className="smart-sort-button" 
+          onClick={handleSmartSort}
+          disabled={isSorting}
+          title="Smart Sort with AI"
+        >
+          <FaWandMagicSparkles /> {isSorting ? 'Sorting...' : 'Smart Sort'}
+        </button>
       </div>
 
       {/* The ACTUAL list of stuff */}
       <ul className='todo-list'>
-        {todos.map((task) => (
+        {todos.map((task, index) => (
           <li key={task.id} className='todo-item' style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}> 
             {/*Editing UI*/}
             {editingTaskId === task.id ? (
@@ -307,8 +409,17 @@ function ToDoList() {
                 className="icon-btn" 
                 onClick={() => toggleDetails(task.id)}
               >
-                {expandedTasks.includes(task.id) ? '▲' : '▼'}
+                {expandedTasks.includes(task.id) ? 'Less Details' : 'More Details'}
               </button>
+
+              {/* Reorder Buttons */}
+              <button className="icon-btn" onClick={() => moveTaskUp(index)} disabled={index === 0} title="Move up">
+                <FaArrowUp />
+              </button>
+              <button className="icon-btn" onClick={() => moveTaskDown(index)} disabled={index === todos.length - 1} title="Move down">
+                <FaArrowDown />
+              </button>
+
 
               {/* The Edit Button */}
               <button className="edit-btn" onClick={() => startEditing(task)} style={{ marginLeft: '10px' }}>
@@ -337,7 +448,7 @@ function ToDoList() {
           )}
           </li>
         ))}
-      </ul>
+      </ul> 
     </div>
   );
 }
